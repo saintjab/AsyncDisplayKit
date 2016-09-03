@@ -122,6 +122,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
    */
   CALayer *_retainedLayer;
 
+  BOOL _hasReceivedReloadData;
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
   BOOL _queuedNodeHeightUpdate;
@@ -353,10 +354,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASPerformBlockOnMainThread(^{
-    [super reloadData];
-  });
+  ASDisplayNodeAssertMainThread();
+  BOOL isFirst = (_hasReceivedReloadData == NO);
+  _hasReceivedReloadData = YES;
+
+  [super reloadData];
   [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
+  if (isFirst && _waitsForInitialDataLoad) {
+    [self waitUntilAllUpdatesAreCommitted];
+  }
 }
 
 - (void)reloadData
