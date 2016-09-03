@@ -468,7 +468,7 @@
   }];
 }
 
-- (void)testWaitsForInitialData
+- (void)testWaitForUpdatesBeforeFirstLayout
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
@@ -478,7 +478,27 @@
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
   
-  tableView.waitsForInitialDataLoad = YES;
+  XCTAssertFalse(CGRectIsEmpty(tableView.bounds));
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  XCTAssertNil([tableView nodeForRowAtIndexPath:indexPath]);
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+  [tableView waitUntilAllUpdatesAreCommitted];
+  XCTAssertNotNil([tableView nodeForRowAtIndexPath:indexPath]);
+  // NOTE: rectForRow still returns 0 because the table view hasn't laid out subviews.
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+}
+
+- (void)testWaitForUpdatesDuringNextLayoutFirstLoad
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  [tableView waitForUpdatesDuringNextLayoutPass];
   XCTAssertFalse(CGRectIsEmpty(tableView.bounds));
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
   XCTAssertNil([tableView nodeForRowAtIndexPath:indexPath]);
@@ -488,7 +508,7 @@
   XCTAssertGreaterThan([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
 }
 
-- (void)testWaitsForInitialDataOFF
+- (void)testInitialDataLoadIsAsync
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
   ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
