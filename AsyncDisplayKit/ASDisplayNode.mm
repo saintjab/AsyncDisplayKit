@@ -3171,8 +3171,8 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   selfProperties[@"interfaceState"] = NSStringFromASInterfaceState(self.interfaceState);
   [result addObject:selfProperties];
 
-  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass(self, [ASCellNode class]);
-  if (cellNode != nil && cellNode != self) {
+  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass(self.supernode, [ASCellNode class]);
+  if (cellNode != nil) {
     selfProperties[@"cellNode"] = ASObjectGetTinyDescription(cellNode);
   }
 

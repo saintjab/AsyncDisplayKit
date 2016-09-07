@@ -45,14 +45,21 @@
 
 #pragma mark - NSObject Overrides
 
+// e.g. <MYPhotoNodeView: 0xFFFFFF; node = <MYPhotoNode: 0xFFFFFE>; frame = ...>
 - (NSString *)description
 {
   NSMutableString *description = [[super description] mutableCopy];
+
   ASDisplayNode *node = _node;
-  NSUInteger semicolon = [description rangeOfString:@";"].location;
-  if (node != nil && semicolon != NSNotFound) {
-    NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
-    [description insertString:nodeString atIndex:semicolon];
+
+  if (node != nil) {
+    [description replaceOccurrencesOfString:@"_ASDisplay" withString:NSStringFromClass([node class]) options:kNilOptions range:NSMakeRange(0, description.length)];
+    NSUInteger semicolon = [description rangeOfString:@";"].location;
+    if (semicolon != NSNotFound) {
+      NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
+      [description insertString:nodeString atIndex:semicolon];
+    }
+
   }
   return description;
 }
