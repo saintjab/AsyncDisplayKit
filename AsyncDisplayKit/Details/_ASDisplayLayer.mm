@@ -237,14 +237,18 @@
   [strongAsyncDelegate cancelDisplayAsyncLayer:self];
 }
 
+// e.g. <MYTextNodeLayer: 0xFFFFFF; node = <MYTextNode: 0xFFFFFFE; name = "Username node for user 179">>
 - (NSString *)description
 {
   NSMutableString *description = [[super description] mutableCopy];
   ASDisplayNode *node = self.asyncdisplaykit_node;
-  NSUInteger insertionIndex = [description rangeOfString:@">"].location;
-  if (node != nil && insertionIndex != NSNotFound) {
-    NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
-    [description insertString:nodeString atIndex:insertionIndex];
+  if (node != nil) {
+    [description replaceOccurrencesOfString:@"_ASDisplay" withString:NSStringFromClass([node class]) options:kNilOptions range:NSMakeRange(0, description.length)];
+    NSUInteger insertionIndex = [description rangeOfString:@">"].location;
+    if (insertionIndex != NSNotFound) {
+      NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
+      [description insertString:nodeString atIndex:insertionIndex];
+    }
   }
   return description;
 }
