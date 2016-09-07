@@ -12,10 +12,13 @@
 
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASTableNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
@@ -276,6 +279,33 @@
                   withCellFrame:cellFrame];
 }
 
+- (NSMutableArray<NSMutableDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray *result = [super propertiesForDebugDescription];
+  NSMutableDictionary *props = [NSMutableDictionary dictionary];
+  UIScrollView *sv = self.scrollView;
+  ASDisplayNode *owningNode = sv.asyncdisplaykit_node;
+  if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    props[@"collectionNode"] = owningNode;
+  } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    props[@"tableNode"] = owningNode;
+  } else if ([sv isKindOfClass:[ASCollectionView class]]) {
+    NSIndexPath *ip = [(ASCollectionView *)sv indexPathForNode:self];
+    if (ip != nil) {
+      props[@"indexPath"] = ip;
+    }
+    props[@"collectionView"] = sv;
+  } else if ([sv isKindOfClass:[ASTableView class]]) {
+    NSIndexPath *ip = [(ASTableView *)sv indexPathForNode:self];
+    if (ip != nil) {
+      props[@"indexPath"] = ip;
+    }
+    props[@"tableView"] = sv;
+  }
+  [result insertObject:props atIndex:0];
+
+  return result;
+}
 @end
 
 

@@ -15,6 +15,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASObjectDescriptionHelpers.h"
 
 @interface _ASDisplayView ()
 @property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
@@ -46,9 +47,14 @@
 
 - (NSString *)description
 {
-  // The standard UIView description is useless for debugging because all ASDisplayNode subclasses have _ASDisplayView-type views.
-  // This allows us to at least see the name of the node subclass and get its pointer directly from [[UIWindow keyWindow] recursiveDescription].
-  return [NSString stringWithFormat:@"<%@, view = %@>", _node, [super description]];
+  NSMutableString *description = [[super description] mutableCopy];
+  ASDisplayNode *node = _node;
+  NSUInteger semicolon = [description rangeOfString:@";"].location;
+  if (node != nil && semicolon != NSNotFound) {
+    NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
+    [description insertString:nodeString atIndex:semicolon];
+  }
+  return description;
 }
 
 #pragma mark - UIView Overrides
